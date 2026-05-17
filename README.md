@@ -1,5 +1,7 @@
 # 💧 Aqua
 
+<img align="right" src="https://github.com/pretiola/aqua/actions/workflows/ci.yml/badge.svg">
+
 Aqua transforms unstructured device telemetry into a structured Prometheus
 and Grafana stack, with no per-device code.
 
