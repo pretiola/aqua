@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust (fmt + clippy + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: collector
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry and build outputs
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: collector
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test --release --all-targets
+
+  config:
+    name: Validate configs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Grafana dashboard JSON
+        run: python3 -m json.tool grafana/provisioning/dashboards/files/dashboard.json > /dev/null
+
+      - name: Validate YAML files
+        run: |
+          python3 - <<'PY'
+          import sys, yaml
+          for path in [
+              "mcp/tools.yaml",
+              "prometheus.yml",
+              "grafana/provisioning/datasources/datasource.yaml",
+              "grafana/provisioning/dashboards/dashboards.yaml",
+              ".github/workflows/ci.yml",
+          ]:
+              with open(path) as f:
+                  yaml.safe_load(f)
+              print(f"ok  {path}")
+          PY
+
+      - name: Validate TOML files
+        run: |
+          python3 - <<'PY'
+          import tomllib
+          for path in ["pipelines.toml.sample", "collector/Cargo.toml"]:
+              with open(path, "rb") as f:
+                  tomllib.load(f)
+              print(f"ok  {path}")
+          PY
+
+      - name: Validate docker-compose
+        run: |
+          touch pipelines.toml
+          docker compose config --quiet

@@ -359,7 +359,11 @@ fn extract_value(chunk: &str) -> Option<(Option<String>, f64, String)> {
     let unit = normalize_unit(&unit_raw).to_string();
 
     Some((
-        if before.is_empty() { None } else { Some(before) },
+        if before.is_empty() {
+            None
+        } else {
+            Some(before)
+        },
         value,
         unit,
     ))
@@ -513,7 +517,9 @@ fn quote_prom_label(s: &str) -> String {
 async fn metrics_handler(State(state): State<SharedState>) -> Response {
     let store = state.metrics.read().await;
     let mut out = String::new();
-    out.push_str("# HELP aqua_metric Universal telemetry value discovered from a pipeline endpoint.\n");
+    out.push_str(
+        "# HELP aqua_metric Universal telemetry value discovered from a pipeline endpoint.\n",
+    );
     out.push_str("# TYPE aqua_metric gauge\n");
     for (pipeline, metrics) in store.iter() {
         for (name, sample) in metrics.iter() {
@@ -526,7 +532,9 @@ async fn metrics_handler(State(state): State<SharedState>) -> Response {
             ));
         }
     }
-    out.push_str("# HELP aqua_metric_updated_seconds Unix timestamp when the metric was last observed.\n");
+    out.push_str(
+        "# HELP aqua_metric_updated_seconds Unix timestamp when the metric was last observed.\n",
+    );
     out.push_str("# TYPE aqua_metric_updated_seconds gauge\n");
     for (pipeline, metrics) in store.iter() {
         for (name, sample) in metrics.iter() {
@@ -549,12 +557,7 @@ async fn metrics_handler(State(state): State<SharedState>) -> Response {
 async fn snapshot_handler(State(state): State<SharedState>) -> Response {
     let store = state.metrics.read().await;
     let body = serde_json::to_string(&*store).unwrap_or_else(|_| "{}".to_string());
-    (
-        StatusCode::OK,
-        [("content-type", "application/json")],
-        body,
-    )
-        .into_response()
+    (StatusCode::OK, [("content-type", "application/json")], body).into_response()
 }
 
 async fn health_handler() -> &'static str {
@@ -642,7 +645,8 @@ mod tests {
 
     #[test]
     fn label_then_value_across_chunks() {
-        let html = "<body>    Filter Speed    xxx\n   85% Speed1       xxx\nEDUTDC333333xxx\n\n</body>";
+        let html =
+            "<body>    Filter Speed    xxx\n   85% Speed1       xxx\nEDUTDC333333xxx\n\n</body>";
         let r = parse(html, &seps(), &bl());
         let found = r
             .iter()
@@ -695,7 +699,8 @@ mod tests {
 
     #[test]
     fn clock_screen_is_ignored() {
-        let html = "<body>      Saturday      xxx\n       22:27        xxx\nEDUTDC333333xxx\n</body>";
+        let html =
+            "<body>      Saturday      xxx\n       22:27        xxx\nEDUTDC333333xxx\n</body>";
         let r = parse(html, &seps(), &bl());
         assert!(r.is_empty(), "expected no metrics, got: {:?}", r);
     }
@@ -724,7 +729,7 @@ mod tests {
     fn custom_separators() {
         // Pipe-delimited input
         let text = "Pressure|45 PSI|Flow|12.5 GPM|";
-        let r = parse(text, &vec!["|".to_string()], &bl());
+        let r = parse(text, &["|".to_string()], &bl());
         let pressure = r.iter().find(|(n, _)| n == "Pressure").expect("pressure");
         let flow = r.iter().find(|(n, _)| n == "Flow").expect("flow");
         assert_eq!(pressure.1.value, 45.0);
