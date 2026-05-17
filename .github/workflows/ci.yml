@@ -50,6 +50,9 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install validators
+        run: pip install --no-cache-dir pyyaml
+
       - name: Validate Grafana dashboard JSON
         run: python3 -m json.tool grafana/provisioning/dashboards/files/dashboard.json > /dev/null
 
