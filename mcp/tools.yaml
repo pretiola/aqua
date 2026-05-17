@@ -1,0 +1,86 @@
+# =============================================================================
+# Aqua MCP toolbox configuration.
+#
+# Served by us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox.
+# Prometheus is the single HTTP source; tools expose raw PromQL plus a few
+# convenience endpoints. Nothing here is domain-specific.
+# =============================================================================
+
+sources:
+  aqua-prom:
+    kind: http
+    baseUrl: http://prometheus:9090
+
+tools:
+  execute_promql:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/query
+    description: "Execute an instant PromQL query against the Aqua Prometheus and return the latest matching samples."
+    queryParams:
+      - name: query
+        type: string
+        description: "PromQL expression to evaluate."
+
+  execute_promql_range:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/query_range
+    description: "Execute a PromQL range query and return a time series between start and end at the given step."
+    queryParams:
+      - name: query
+        type: string
+        description: "PromQL expression to evaluate."
+      - name: start
+        type: string
+        description: "Start time in RFC3339 or unix timestamp format."
+      - name: end
+        type: string
+        description: "End time in RFC3339 or unix timestamp format."
+      - name: step
+        type: string
+        description: "Resolution step such as 15s, 1m, 5m."
+
+  list_metric_names:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/label/__name__/values
+    description: "Return every metric name currently stored in Prometheus."
+
+  list_labels:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/labels
+    description: "Return every label name across all stored series."
+
+  list_pipelines:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/label/pipeline/values
+    description: "Return every configured Aqua pipeline name."
+
+  list_metrics:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/label/name/values
+    description: "Return every metric name discovered by any pipeline."
+
+  list_units:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/label/unit/values
+    description: "Return every inferred unit currently in use."
+
+  get_targets:
+    kind: http
+    source: aqua-prom
+    method: GET
+    path: /api/v1/targets
+    description: "Return the health of every Prometheus scrape target."

@@ -1,0 +1,58 @@
+services:
+  aqua:
+    build: ./collector
+    environment:
+      - AQUA_CONFIG=/config/pipelines.toml
+      - RUST_LOG=${RUST_LOG:-info}
+    volumes:
+      - ./pipelines.toml:/config/pipelines.toml:ro
+    restart: unless-stopped
+    # The collector itself is on an internal network; Prometheus reaches it as `aqua:9090`.
+    # Expose it on the host too so you can curl /metrics or /snapshot directly.
+    ports:
+      - "${AQUA_PORT:-9090}:9090"
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROM_RETENTION:-30d}'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PROM_PORT:-9091}:9090"
+    depends_on:
+      - aqua
+    restart: unless-stopped
+
+  mcp:
+    image: us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:latest
+    command: ["--config", "/app/tools.yaml", "--address", "0.0.0.0", "--port", "5000", "--ui"]
+    volumes:
+      - ./mcp/tools.yaml:/app/tools.yaml:ro
+    ports:
+      - "${MCP_PORT:-5000}:5000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "${GRAFANA_PORT:-3005}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

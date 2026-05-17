@@ -1,0 +1,20 @@
+# Local runtime configuration (copy from pipelines.toml.sample / .env.example)
+pipelines.toml
+.env
+
+# Rust build artifacts
+collector/target/
+collector/Cargo.lock
+
+# Docker / persistent volumes
+volumes/
+prometheus_data/
+grafana_data/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Claude Code local settings (project-wide settings.json may be committed)
+.claude/settings.local.json

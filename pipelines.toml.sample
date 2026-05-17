@@ -1,0 +1,67 @@
+# =============================================================================
+# Aqua Pipeline Configuration — sample
+#
+# Copy this file to `pipelines.toml` and edit it for your environment:
+#
+#     cp pipelines.toml.sample pipelines.toml
+#
+# `pipelines.toml` is gitignored. It is the only configuration the collector
+# needs at runtime.
+#
+# -----------------------------------------------------------------------------
+#
+# Every [[pipeline]] block is an independent endpoint Aqua will poll, parse,
+# and expose as Prometheus metrics. Pipelines run concurrently; each one
+# becomes its own `pipeline="..."` label value on the `aqua_metric` gauge.
+#
+# Universal parser rules (applied to every pipeline):
+#   1. HTML is stripped and entities (&nbsp; &#176; &deg; ...) are decoded.
+#   2. The response body is split into chunks on `separators`.
+#   3. Each chunk is interpreted as one of:
+#        - "Label  Value Unit"        -> Label = Value (unit inferred)
+#        - "Label" then "Value Unit"  -> Label = Value (paired across chunks)
+#        - "Label  State"             -> Label = state (on/off/auto/manual/
+#                                         remote/standby/fault, ...)
+#   4. Chunks matching clock patterns, weekday/month names, or unbroken
+#      alphanumeric strings (build codes, serials) are discarded.
+#
+# Nothing in this file is domain-specific. Point Aqua at anything that emits
+# text and you get a dashboard.
+# =============================================================================
+
+listen = "0.0.0.0:9090"
+
+# -----------------------------------------------------------------------------
+# Example 1: rotating LCD-style endpoint reached over POST with a magic body
+# and `xxx` padding between fields. Mirrors what many embedded controllers
+# expose on a small HTTP page.
+# -----------------------------------------------------------------------------
+[[pipeline]]
+name          = "lcd-panel"
+url           = "http://device.local/status.htm"
+method        = "POST"
+body          = "Update Local Server&"
+content_type  = "text/plain;charset=UTF-8"
+interval_secs = 5
+separators    = ["xxx", "\n", "\t"]
+
+# -----------------------------------------------------------------------------
+# Example 2: pipe-delimited GET endpoint
+# -----------------------------------------------------------------------------
+# [[pipeline]]
+# name          = "remote-station"
+# url           = "http://10.0.0.50/metrics.txt"
+# method        = "GET"
+# interval_secs = 10
+# separators    = ["|", "\n"]
+
+# -----------------------------------------------------------------------------
+# Example 3: comma-separated dump, with extra label blocklist entries
+# -----------------------------------------------------------------------------
+# [[pipeline]]
+# name          = "weather-board"
+# url           = "http://weather.example/raw"
+# method        = "GET"
+# interval_secs = 30
+# separators    = [",", "\n"]
+# blocklist     = ["sunrise", "sunset", "phase"]

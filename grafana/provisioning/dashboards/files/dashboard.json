@@ -1,0 +1,375 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Universal telemetry: every metric discovered by every pipeline.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": true,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "panels": [],
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+      "id": 101,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+          "expr": "count(count by (pipeline) (aqua_metric{pipeline=~\"$pipeline\"}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Pipelines",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "id": 102,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+          "expr": "count(count by (name) (aqua_metric{pipeline=~\"$pipeline\"}))",
+          "refId": "A"
+        }
+      ],
+      "title": "Distinct Metrics",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 60 },
+              { "color": "green", "value": 600 }
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 1 },
+      "id": 103,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+          "expr": "time() - max(aqua_metric_updated_seconds{pipeline=~\"$pipeline\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Most-recent metric age",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "id": 200,
+      "panels": [],
+      "title": "Discovered Metrics",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "fahrenheit" },
+            "properties": [
+              { "id": "unit", "value": "fahrenheit" },
+              { "id": "min", "value": 0 },
+              { "id": "max", "value": 120 },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "blue", "value": null },
+                    { "color": "green", "value": 50 },
+                    { "color": "orange", "value": 85 },
+                    { "color": "red", "value": 100 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "celsius" },
+            "properties": [
+              { "id": "unit", "value": "celsius" },
+              { "id": "min", "value": -20 },
+              { "id": "max", "value": 50 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "percent" },
+            "properties": [
+              { "id": "unit", "value": "percent" },
+              { "id": "min", "value": 0 },
+              { "id": "max", "value": 100 },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "green", "value": null },
+                    { "color": "yellow", "value": 70 },
+                    { "color": "red", "value": 90 }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "state" },
+            "properties": [
+              { "id": "min", "value": -1 },
+              { "id": "max", "value": 5 },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "-1": { "text": "FAULT", "color": "red", "index": 0 },
+                      "0": { "text": "OFF", "color": "dark-red", "index": 1 },
+                      "1": { "text": "ON", "color": "green", "index": 2 },
+                      "2": { "text": "AUTO", "color": "blue", "index": 3 },
+                      "3": { "text": "MANUAL", "color": "orange", "index": 4 },
+                      "4": { "text": "REMOTE", "color": "purple", "index": 5 },
+                      "5": { "text": "STANDBY", "color": "yellow", "index": 6 }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "rpm" },
+            "properties": [{ "id": "unit", "value": "rotrpm" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "psi" },
+            "properties": [{ "id": "unit", "value": "pressurepsi" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "gpm" },
+            "properties": [{ "id": "unit", "value": "flowgpm" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "volt" },
+            "properties": [{ "id": "unit", "value": "volt" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "ampere" },
+            "properties": [{ "id": "unit", "value": "amp" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "hertz" },
+            "properties": [{ "id": "unit", "value": "hertz" }, { "id": "min", "value": 0 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "ph" },
+            "properties": [{ "id": "min", "value": 0 }, { "id": "max", "value": 14 }]
+          }
+        ]
+      },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 6 },
+      "id": 1,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "11.0.0",
+      "repeat": "name",
+      "repeatDirection": "h",
+      "maxPerRow": 6,
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+          "expr": "aqua_metric{name=\"$name\", pipeline=~\"$pipeline\"}",
+          "legendFormat": "{{unit}}",
+          "refId": "A"
+        }
+      ],
+      "title": "$name",
+      "type": "gauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 300,
+      "panels": [],
+      "title": "History",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "mode": "none", "group": "A" }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 19 },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": ["last", "min", "max", "mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+          "expr": "aqua_metric{pipeline=~\"$pipeline\", name=~\"$name\"}",
+          "legendFormat": "{{name}} ({{pipeline}})",
+          "refId": "A"
+        }
+      ],
+      "title": "All selected metrics over time",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["aqua", "telemetry", "dynamic"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+        "definition": "label_values(aqua_metric, pipeline)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": true,
+        "name": "pipeline",
+        "options": [],
+        "query": { "qryType": 1, "query": "label_values(aqua_metric, pipeline)", "refId": "PrometheusVariableQueryEditor-VariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": { "selected": false, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "aqua_prometheus_uid" },
+        "definition": "label_values(aqua_metric{pipeline=~\"$pipeline\"}, name)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Metric",
+        "multi": true,
+        "name": "name",
+        "options": [],
+        "query": { "qryType": 1, "query": "label_values(aqua_metric{pipeline=~\"$pipeline\"}, name)", "refId": "PrometheusVariableQueryEditor-VariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Aqua Universal Telemetry",
+  "uid": "aqua_dashboard",
+  "version": 1,
+  "weekStart": ""
+}
