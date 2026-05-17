@@ -16,6 +16,8 @@ When the heuristic succeeds, a working dashboard is produced from a single
 configuration block. When it fails, the separator list (not the code) is
 adjusted.
 
+<img width="777" height="822" alt="image" src="https://github.com/user-attachments/assets/87551776-db8f-4817-b22e-fe1479a7a14d" />
+
 ## 🏗️ Architecture
 
 ```
